@@ -1,6 +1,7 @@
 import os
 
 from tkinter import Button, Frame, Label, Spinbox, StringVar, Tk, filedialog
+from typing import Iterable, Tuple
 from PIL import Image
 
 
@@ -40,15 +41,24 @@ class App(Frame):
             image.show()
 
     def process_image(self):
-        if not self.image_filename.get():
-            return
-        basename, extension = os.path.splitext(
-            filedialog.asksaveasfilename(defaultextension='png'))
         with Image.open(self.image_filename.get()) as image:
-            for x in range(int(self.columns.get())):
-                for y in range(int(self.rows.get())):
-                    image.crop(self.create_box(image, x, y)).save(
-                        f'{basename}-{x}-{y}{extension}')
+            self._process_image(image)
+
+    def _process_image(self, image: Image.Image):
+        filename = filedialog.asksaveasfilename(defaultextension='png')
+        columns = int(self.columns.get())
+        rows = int(self.rows.get())
+        for x, y in self.iterate_coordinates(columns, rows):
+            cropped_image = self.crop_image(image, x, y)
+            cropped_image.save(self.generate_filename(filename, x, y))
+
+    def iterate_coordinates(self, width: int, height: int) -> Iterable[Tuple[int, int]]:
+        for x in range(width):
+            for y in range(height):
+                yield (x, y)
+
+    def crop_image(self, image: Image.Image, x: int, y: int) -> Image.Image:
+        return image.crop(self.create_box(image, x, y))
 
     def create_box(self, image: Image.Image, x: int, y: int) -> tuple[int, int, int, int]:
         sprite_width = image.width / int(self.columns.get())
@@ -58,6 +68,10 @@ class App(Frame):
         right = left + sprite_width
         down = up + sprite_height
         return (left, up, right, down)
+
+    def generate_filename(self, filename: str, x: any, y: any) -> str:
+        basename, ext = os.path.splitext(filename)
+        return f'{basename}-{x}-{y}{ext}'
 
 
 def main():
