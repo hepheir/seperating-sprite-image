@@ -6,7 +6,7 @@ authors = ["Hepheir <hepheir@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-Pillow = "^9.2.0"
+Pillow = "^9.3.0"
 
 [tool.poetry.dev-dependencies]
 autopep8 = "^1.7.0"
